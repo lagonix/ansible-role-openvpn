@@ -20,7 +20,7 @@
 - debug: msg={{ additional_certs_to_add }}
 
 - name: generate client key
-  command: "openssl req -nodes -newkey rsa:{{openvpn_rsa_bits}} -keyout {{item}}.key -out {{item}}.csr -days 3650 -subj /CN=OpenVPN-Client-{{ inventory_hostname[:24] }}-{{ item[:24] }}/"
+  command: "openssl req -nodes -newkey rsa:{{openvpn_rsa_bits}} -keyout {{item}}.key -out {{item}}.csr -days 3650 -subj /CN=OpenVPN-Client-{{ openvpn_ca_name[:24] }}-{{ item[:24] }}/"
   args:
     chdir: "{{ openvpn_key_dir }}"
     creates: "{{item}}.key"
@@ -44,7 +44,6 @@
   with_items:
     - "{{clients}}"
     - "{{ additional_certs_to_add }}"
-
 
 - name: register server ca key
   slurp:
@@ -75,7 +74,7 @@
 - name: generate client config
   template:
     src: client.ovpn.j2
-    dest: "{{ openvpn_ovpn_dir }}/{{item.0.item}}-{{inventory_hostname}}.ovpn"
+    dest: "{{ openvpn_ovpn_dir }}/{{item.0.item}}-{{ openvpn_server_hostname }}.ovpn"
     owner: root
     group: root
     mode: 0400
@@ -85,8 +84,8 @@
 
 - name: fetch client config
   fetch:
-    src: "{{ openvpn_ovpn_dir }}/{{item}}-{{inventory_hostname}}.ovpn"
-    dest: "{{ openvpn_fetch_config_dir }}/{{item}}/{{inventory_hostname}}{{config_fetch_suffix | default('')}}.ovpn"
+    src: "{{ openvpn_ovpn_dir }}/{{item}}-{{ openvpn_server_hostname }}.ovpn"
+    dest: "{{ openvpn_fetch_config_dir }}/{{item}}/{{ openvpn_server_hostname }}{{config_fetch_suffix | default('')}}.ovpn"
     flat: yes
   with_items:
     - "{{clients}}"

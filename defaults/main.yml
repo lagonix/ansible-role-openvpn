@@ -49,6 +49,7 @@ openvpn_keepalive_ping: 5
 openvpn_keepalive_timeout: 30
 openvpn_service_user: nobody
 openvpn_service_group: nogroup
+openvpn_ca_name: "{{ inventory_hostname }}"
 
 # Used in firewalld
 firewalld_default_interface_zone: public
